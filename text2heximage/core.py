@@ -6,42 +6,45 @@ import random
 import cv2
 
 class T2i:
-  def __init__(self):
-    self.image_height = 240
-    self.image_width = 240
-    self.image_block = 40
+  def __init__(self, height=240, width=240, block=40):
+    self.image_height = height
+    self.image_width = width
+    self.image_block = block
 
   # RGB -> Hex Color
   def createRgbtoHex(self, rgb):
     return ('%02x%02x%02x' % (rgb[2], rgb[1], rgb[0]))
 
   # Image -> Color(HEX)
-  def getHexFromImage(self, image):
+  def decrypt(self, image):
     w = self.image_height
     h = self.image_width
     block = self.image_block
     line_number = 0
-    image = cv2.imread(image+".png")
+    image = cv2.imread(image)
     color = []
     image_range = (w/block)*(h/block)
-    for i in range(round(image_range)):
-      if (i != 0 and i%(w/block) == 0):
-        line_number += 1
-      check_size_height = int((block/2)+block*(i%(h/block)))
-      check_size_width = int((block/2)+block*line_number)
-      print('check_size > '+str(check_size_height)+' '+str(check_size_width))
+    try:
+      for i in range(round(image_range)):
+        if (i != 0 and i%(w/block) == 0):
+          line_number += 1
+        check_size_height = int((block/2)+block*(i%(h/block)))
+        check_size_width = int((block/2)+block*line_number)
+        print('check_size > '+str(check_size_height)+' '+str(check_size_width))
 
-      color_temp = image[check_size_width, check_size_height]
-      print(color_temp)
+        color_temp = image[check_size_width, check_size_height]
+        print(color_temp)
 
-      if (color_temp[0] != 0 and color_temp[1] != 0 and color_temp[2] != 0):
-        color.append(('%02x%02x%02x' % (int(color_temp[2]), int(color_temp[1]), int(color_temp[0]))))
-      else:
-        break
-      
+        if (color_temp[0] != 0 and color_temp[1] != 0 and color_temp[2] != 0):
+          color.append(('%02x%02x%02x' % (int(color_temp[2]), int(color_temp[1]), int(color_temp[0]))))
+        else:
+          break
+        
 
 
-    return color
+      return color
+    except IndexError:
+      print('ERROR : ', '블록과 이미지 크기가 맞지 않습니다. 이미지 크기가 블록의 배수가 되게끔 설정하세요. ')
 
   # 랜덤 ID 생성
   def generatePrimaryId(self):
@@ -62,30 +65,29 @@ class T2i:
     
     return tempText
 
-
-
-  def createEncryptionImage(self, hexlist):
+  def encrypt(self, hexlist, directory):
     w = self.image_height # 60w 60h 10c
     h = self.image_width
     c = self.image_block # 블록 크기
     k = 0 # 라인 넘버 (첫번째 라인은 0번)
     img = Image.new('RGB', (w, h), color = 'black')
     img1 = ImageDraw.Draw(img)
-    # shape1 = [(10, 10), (w - 60, h - 60)]
-    # shape2 = [(20, 10), (w - 50, h - 60)]
-
     for i in range(len(hexlist)):
       if (hexlist[i] == ""):
-        print('N1')
+        pass
       elif (len(hexlist[i]) != 6):
-        print('N2')
+        pass
       elif (i % (h/c) == 0):
         print(hexlist[i], k, [((w), c*(k+1)), (w+(i%(w/c)-1)*c), (k*c)])
         img1.rectangle([((w), c*(k+1)), (w+(i%(w/c)-1)*c), (k*c)], fill ="#"+hexlist[i])
         k += 1
       elif (hexlist[i] != ""):
-        print(hexlist[i], k, [(c*(i%(h/c)), c*(k+1)), ((i%(w/c)-1)*c), (k*c)])
-        img1.rectangle([(c*(i%(h/c)), c*(k+1)), ((i%(w/c)-1)*c), (k*c)], fill ="#"+hexlist[i])
+        color = "#"+hexlist[i]
+        size = (c*(i%(h/c))-1, (c*(k+1))-1)
+        width = ((i%(w/c)-1)*c)
+        height = (k*c)
+
+        img1.rectangle([size, (width, height)], fill=color)
 
     img.show()
-    img.save('result.png')
+    img.save(directory+'result.png')
