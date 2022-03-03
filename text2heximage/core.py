@@ -30,12 +30,12 @@ class T2i:
           line_number += 1
         check_size_height = int((block/2)+block*(i%(h/block)))
         check_size_width = int((block/2)+block*line_number)
-        print('check_size > '+str(check_size_height)+' '+str(check_size_width))
+        #print('check_size > '+str(check_size_height)+' '+str(check_size_width))
 
         color_temp = image[check_size_width, check_size_height]
-        print(color_temp)
+        #print(color_temp)
 
-        if (color_temp[0] != 0 and color_temp[1] != 0 and color_temp[2] != 0):
+        if (color_temp[0] != 0 or color_temp[1] != 0 or color_temp[2] != 0):
           color.append(('%02x%02x%02x' % (int(color_temp[2]), int(color_temp[1]), int(color_temp[0]))))
         else:
           break
@@ -70,19 +70,24 @@ class T2i:
     h = self.image_width
     c = self.image_block # 블록 크기
     k = 0 # 라인 넘버 (첫번째 라인은 0번)
+    padding = '0'
+
     img = Image.new('RGB', (w, h), color = 'black')
     img1 = ImageDraw.Draw(img)
     for i in range(len(hexlist)):
-      if (hexlist[i] == ""):
-        pass
-      elif (len(hexlist[i]) != 6):
+      hexcolor = str(f'{hexlist[i] :{padding}<{6}}')
+      if (hexcolor == "000000"):
         pass
       elif (i % (h/c) == 0):
-        print(hexlist[i], k, [((w), c*(k+1)), (w+(i%(w/c)-1)*c), (k*c)])
-        img1.rectangle([((w), c*(k+1)), (w+(i%(w/c)-1)*c), (k*c)], fill ="#"+hexlist[i])
+        color = "#"+hexcolor
+        size = (w, (c*(k+1))-1)
+        width = (w+(i%(w/c)-1)*c)
+        height = (k*c)
+
+        img1.rectangle([size, (width, height)], fill=color)
         k += 1
-      elif (hexlist[i] != ""):
-        color = "#"+hexlist[i]
+      elif (hexcolor != ""):
+        color = "#"+hexcolor
         size = (c*(i%(h/c))-1, (c*(k+1))-1)
         width = ((i%(w/c)-1)*c)
         height = (k*c)

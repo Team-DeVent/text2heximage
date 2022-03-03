@@ -15,7 +15,9 @@ def main():
   # hex_data = CRH.createRgbtoHex(rgb_color)
 
   print(pid_org)
-  print(''.join(hex_color))
+  print(bytes.fromhex(''.join(pid_hex)).decode('utf-8'), pid_hex)
+
+  print(bytes.fromhex(''.join(hex_color)).decode('utf-8'))
   # print(hex_data)
      
 if __name__ == "__main__":
